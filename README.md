@@ -1,1 +1,1 @@
-# mruby-native-ext-deserialize
+# mruby-native-ext-type

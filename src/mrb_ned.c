@@ -6,19 +6,19 @@
 
 #include <mruby/ned.h>
 
-// Ruby-DSL: native_ext_deserialize :field, Type
+// Ruby-DSL: native_ext_type :field, Type
 static mrb_value
-mrb_native_ext_deserialize(mrb_state* mrb, mrb_value self)
+mrb_native_ext_type(mrb_state* mrb, mrb_value self)
 {
   mrb_sym name;
   mrb_value type;
 
   mrb_get_args(mrb, "no", &name, &type);
 
-  mrb_value schema = mrb_iv_get(mrb, self, MRB_SYM(__native_ext_deserialize__));
+  mrb_value schema = mrb_iv_get(mrb, self, MRB_SYM(__native_ext_type__));
   if (mrb_nil_p(schema)) {
     schema = mrb_hash_new_capa(mrb, 16);
-    mrb_iv_set(mrb, self, MRB_SYM(__native_ext_deserialize__), schema);
+    mrb_iv_set(mrb, self, MRB_SYM(__native_ext_type__), schema);
   }
 
   mrb_hash_set(mrb, schema, mrb_symbol_value(name), type);
@@ -27,28 +27,28 @@ mrb_native_ext_deserialize(mrb_state* mrb, mrb_value self)
 }
 
 MRB_API mrb_value
-mrb_ned_schema(mrb_state* mrb, struct RClass* klass)
+mrb_net_schema(mrb_state* mrb, struct RClass* klass)
 {
-  return mrb_iv_get(mrb, mrb_obj_value(klass), MRB_SYM(__native_ext_deserialize__));
+  return mrb_iv_get(mrb, mrb_obj_value(klass), MRB_SYM(__native_ext_type__));
 }
 
 void
-mrb_mruby_native_ext_deserialize_gem_init(mrb_state* mrb)
+mrb_mruby_native_ext_type_gem_init(mrb_state* mrb)
 {
   mrb_define_class_method_id(mrb,
                     mrb->class_class,
-                    MRB_SYM(native_ext_deserialize),
-                    mrb_native_ext_deserialize,
+                    MRB_SYM(native_ext_type),
+                    mrb_native_ext_type,
                     MRB_ARGS_REQ(2));
 
   mrb_define_module_function_id(mrb,
                     mrb->module_class,
-                    MRB_SYM(native_ext_deserialize),
-                    mrb_native_ext_deserialize,
+                    MRB_SYM(native_ext_type),
+                    mrb_native_ext_type,
                     MRB_ARGS_REQ(2));
 }
 
 void
-mrb_mruby_native_ext_deserialize_gem_final(mrb_state* mrb)
+mrb_mruby_native_ext_type_gem_final(mrb_state* mrb)
 {
 }

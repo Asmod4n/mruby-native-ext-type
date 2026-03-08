@@ -1,8 +1,6 @@
 #pragma once
 
 #include <mruby.h>
-#include <mruby/presym.h>
-#include <mruby/variable.h>
 
 MRB_BEGIN_DECL
 
