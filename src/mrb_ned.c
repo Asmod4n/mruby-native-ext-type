@@ -12,17 +12,14 @@
  *
  * Stores { :@field => SomeClass } in the class-level ivar __native_ext_type__.
  * The second argument must be a Class or Module; raises TypeError otherwise.
- *
- * Any Ruby class works, including user-defined ones registered with
- * CBOR.register_tag or equivalent:
+
  *
  *   class Address; end
- *   CBOR.register_tag(1001, Address)
  *
  *   class Person
  *     native_ext_type :@name,    String
  *     native_ext_type :@age,     Integer
- *     native_ext_type :@address, Address   # previously registered class
+ *     native_ext_type :@address, Address
  *   end
  */
 static mrb_value
@@ -51,6 +48,29 @@ mrb_native_ext_type(mrb_state *mrb, mrb_value self)
   mrb_hash_set(mrb, schema, mrb_symbol_value(ivar), type_ary);
   return mrb_nil_value();
 }
+
+static mrb_value
+net_schema_rb(mrb_state *mrb, mrb_value self)
+{
+  return mrb_net_schema(mrb, mrb_class_ptr(self));
+}
+
+static mrb_value
+net_check_type_rb(mrb_state *mrb, mrb_value self)
+{
+  mrb_sym ivar;
+  mrb_value actual;
+  mrb_get_args(mrb, "no", &ivar, &actual);
+
+  mrb_value schema = mrb_net_schema(mrb, mrb_class_ptr(self));
+  if (!mrb_hash_p(schema))
+    return mrb_false_value();
+
+  mrb_value schema_type = mrb_hash_fetch(mrb, schema, mrb_symbol_value(ivar), mrb_nil_value());
+  return mrb_bool_value(mrb_net_check_type(mrb, schema_type, actual));
+}
+
+MRB_BEGIN_DECL
 
 MRB_API mrb_value
 mrb_net_schema(mrb_state *mrb, struct RClass *klass)
@@ -87,9 +107,31 @@ mrb_mruby_native_ext_type_gem_init(mrb_state *mrb)
     MRB_SYM(native_ext_type),
     mrb_native_ext_type,
     MRB_ARGS_REQ(2)|MRB_ARGS_REST());
-}
+
+  mrb_define_class_method_id(mrb, mrb->class_class,
+    MRB_SYM(net_schema),
+    net_schema_rb,
+    MRB_ARGS_NONE());
+
+  mrb_define_module_function_id(mrb, mrb->module_class,
+    MRB_SYM(net_schema),
+    net_schema_rb,
+    MRB_ARGS_NONE());
+
+  mrb_define_class_method_id(mrb, mrb->class_class,
+    MRB_SYM(net_check_type),
+    net_check_type_rb,
+    MRB_ARGS_REQ(2));
+
+  mrb_define_module_function_id(mrb, mrb->module_class,
+    MRB_SYM(net_check_type),
+    net_check_type_rb,
+    MRB_ARGS_REQ(2));
+  }
 
 void
 mrb_mruby_native_ext_type_gem_final(mrb_state *mrb)
 {
 }
+
+MRB_END_DECL
